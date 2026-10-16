@@ -1,0 +1,54 @@
+[project]
+name = "documind"
+version = "1.0.0"
+description = "Chat with your documents: hybrid search over pgvector and Postgres full-text, answers with citations from Claude."
+readme = "../README.md"
+license = "MIT"
+authors = [{ name = "Qaweem Ahmad" }]
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic==1.11.0",
+    "fastapi==0.142.2",
+    "fastembed==0.8.1",
+    "langchain-text-splitters==1.1.2",
+    "pgvector==0.5.0",
+    "psycopg[binary]==3.3.6",
+    "psycopg-pool==3.3.3",
+    "pydantic==2.13.5",
+    "pydantic-settings==2.15.0",
+    "pypdf==6.19.0",
+    "python-multipart==0.0.32",
+    "uvicorn==0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx==0.28.1",
+    "mypy==2.4.0",
+    "pytest==9.1.1",
+    "ruff==0.16.10",
+]
+
+[tool.uv]
+package = false
+# Transitive dependencies too: nothing published in the two weeks before the lock (supply-chain safety).
+exclude-newer = "2026-10-02T00:00:00Z"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "RUF"]
+# The formatter wraps code; long SQL strings read better unbroken.
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
