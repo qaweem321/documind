@@ -1,0 +1,5 @@
+{
+  "frontend/**/*.{ts,tsx,js,mjs,json,css}": ["prettier --write"],
+  "*.{md,yml,yaml}": ["prettier --write"],
+  "backend/**/*.py": ["backend/.venv/bin/ruff check --fix", "backend/.venv/bin/ruff format"]
+}

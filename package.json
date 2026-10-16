@@ -1,0 +1,17 @@
+{
+  "name": "documind-tooling",
+  "private": true,
+  "description": "Repository tooling only: commit message checks and formatting. The app lives in backend/ and frontend/.",
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write frontend README.md docs .github",
+    "format:check": "prettier --check frontend README.md docs .github"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.9"
+  }
+}
