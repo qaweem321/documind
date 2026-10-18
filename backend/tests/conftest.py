@@ -64,9 +64,7 @@ def make_pdf(pages: list[str]) -> bytes:
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings(
-        database_url=TEST_DATABASE_URL, anthropic_api_key="sk-test", chunk_size=300, chunk_overlap=50
-    )
+    return Settings(database_url=TEST_DATABASE_URL, anthropic_api_key=None, chunk_size=300, chunk_overlap=50)
 
 
 @pytest.fixture

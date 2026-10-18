@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { AnswerDraft } from "@/lib/answer";
 import { api } from "@/lib/api";
-import { useDocuments } from "@/lib/queries";
+import { useConfig, useDocuments } from "@/lib/queries";
 import { ask } from "@/lib/sse";
 import type { Conversation, ConversationDetail, Message } from "@/lib/types";
 import { MessageView } from "./MessageView";
@@ -22,6 +22,7 @@ const EXAMPLES = [
 export function ChatView({ initial, actions }: { initial: ConversationDetail | null; actions?: ReactNode }) {
   const client = useQueryClient();
   const router = useRouter();
+  const config = useConfig();
   const documents = useDocuments();
   const [conversation, setConversation] = useState<Conversation | null>(initial);
   const [messages, setMessages] = useState<Message[]>(initial?.messages ?? []);
@@ -126,6 +127,12 @@ export function ChatView({ initial, actions }: { initial: ConversationDetail | n
           {actions}
         </div>
       </header>
+      {config.data?.demoMode && (
+        <p className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          Demo mode: no Anthropic API key is set, so answers quote the best passages instead of being written
+          by Claude.
+        </p>
+      )}
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl space-y-4 px-4 py-6">
           {messages.length === 0 && !pending && (

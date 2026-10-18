@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = Field(pattern=r"^postgres(ql)?://")
-    anthropic_api_key: str = Field(min_length=1)
+    # Without a key DocuMind runs in demo mode: search still works, answers quote the best passages.
+    anthropic_api_key: str | None = None
     claude_model: str = "claude-opus-5-5"
     claude_effort: Literal["low", "medium", "high", "xhigh", "max"] = "medium"
     # Must produce 384-dimensional vectors (the column size in migrations/001_init.sql).
@@ -24,6 +25,15 @@ class Settings(BaseSettings):
     chat_rate_limit_per_minute: int = Field(default=20, ge=1)
     cors_origins: list[str] = ["http://localhost:3600"]
     seed_examples: bool = False
+
+    @field_validator("anthropic_api_key")
+    @classmethod
+    def blank_is_none(cls, value: str | None) -> str | None:
+        return value or None
+
+    @property
+    def demo_mode(self) -> bool:
+        return self.anthropic_api_key is None
 
 
 @lru_cache

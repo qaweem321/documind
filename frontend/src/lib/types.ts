@@ -55,7 +55,8 @@ export type Conversation = {
 export type ConversationDetail = Conversation & { messages: Message[] };
 
 export type AppConfig = {
-  model: string;
+  demoMode: boolean;
+  model: string | null;
   maxUploadMb: number;
   acceptedExtensions: string[];
 };

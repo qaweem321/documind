@@ -157,6 +157,6 @@ def test_validation_errors_and_config(client: TestClient) -> None:
     assert client.post("/api/search", json={"query": ""}).status_code == 422
     assert client.get("/api/documents/not-a-uuid").status_code == 422
     config = client.get("/api/config").json()
-    assert config["model"] == "claude-opus-5-5"
+    assert config["demoMode"] is True and config["model"] is None
     assert ".pdf" in config["acceptedExtensions"]
     assert client.get("/api/health").json() == {"ok": True}

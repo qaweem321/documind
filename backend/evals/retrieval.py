@@ -51,10 +51,7 @@ MODES = ("keyword", "semantic", "hybrid")
 
 async def main() -> None:
     url = os.environ["DATABASE_URL"]
-    # Only search is evaluated, so Claude is never called and the key is a placeholder.
-    settings = Settings(
-        database_url=url, anthropic_api_key="unused", chunk_size=int(os.environ.get("CHUNK_SIZE", "500"))
-    )
+    settings = Settings(database_url=url, chunk_size=int(os.environ.get("CHUNK_SIZE", "500")))
     await run_migrations(url)
     pool = create_pool(url)
     await pool.open(wait=True)

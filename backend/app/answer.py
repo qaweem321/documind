@@ -121,3 +121,39 @@ class ClaudeAnswerer:
             yield AnswerError(f"Claude returned an error ({error.status_code}). Try again.")
         except anthropic.APIConnectionError:
             yield AnswerError("Couldn't reach the Claude API. Check the network and try again.")
+
+
+class DemoAnswerer:
+    """Used when no API key is set: quotes the best passages, with real citations, so search and
+    the citation UI can be tried for free."""
+
+    async def stream(
+        self, question: str, history: Sequence[Turn], sources: Sequence[Source]
+    ) -> AsyncIterator[AnswerEvent]:
+        if not sources:
+            yield TextDelta(0, "Demo mode: no passages matched this question.")
+            return
+        block = 0
+        yield TextDelta(
+            block,
+            "Demo mode (no ANTHROPIC_API_KEY set): the most relevant passages instead of a written answer.\n\n",
+        )
+        for source in sources[:3]:
+            excerpt = _first_sentences(source.content)
+            block += 1
+            yield TextDelta(block, f"- {source_title(source)}: “{excerpt}”")
+            yield CitationDelta(block, source.index, excerpt)
+            block += 1
+            yield TextDelta(block, "\n")
+
+
+def _first_sentences(text: str, limit: int = 280) -> str:
+    flat = " ".join(text.split())
+    if len(flat) <= limit:
+        return flat
+    cut = flat.rfind(". ", 0, limit)
+    return flat[: cut + 1] if cut > 80 else flat[:limit].rsplit(" ", 1)[0] + "…"
+
+
+def create_answerer(settings: Settings) -> Answerer:
+    return DemoAnswerer() if settings.demo_mode else ClaudeAnswerer(settings)
