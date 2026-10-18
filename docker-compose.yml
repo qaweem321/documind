@@ -2,8 +2,8 @@
 #   docker compose up -d db                    # Postgres + pgvector only, for local development
 #   docker compose --profile app up -d --build # everything, at http://localhost:3600
 #
-# Put ANTHROPIC_API_KEY in a .env file next to this one for real answers; without it DocuMind
-# runs in demo mode. The database password is for local use only.
+# Put ANTHROPIC_API_KEY in a .env file next to this one; the backend refuses to start without it.
+# The database password is for local use only.
 
 services:
   db:

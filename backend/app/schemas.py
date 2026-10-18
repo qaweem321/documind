@@ -96,7 +96,6 @@ class AskRequest(Model):
 
 
 class AppConfig(Model):
-    demo_mode: bool
-    model: str | None
+    model: str
     max_upload_mb: int
     accepted_extensions: list[str]

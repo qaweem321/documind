@@ -29,7 +29,6 @@ const source: Source = {
   score: 0.03,
 };
 const config = {
-  demoMode: false,
   model: "claude-opus-5-5",
   maxUploadMb: 20,
   acceptedExtensions: [".md", ".pdf", ".txt"],
@@ -88,14 +87,13 @@ describe("ChatView", () => {
     expect(screen.getByText("Remote Work Policy")).toHaveAttribute("href", "/api/documents/d1/file");
   });
 
-  it("points to the library when no document is ready, and shows the demo banner", async () => {
-    mockFetch({ "GET /api/config": { ...config, demoMode: true }, "GET /api/documents": [] });
+  it("points to the library when no document is ready", async () => {
+    mockFetch({ "GET /api/documents": [] });
     renderWithQuery(<ChatView initial={null} />);
     expect(await screen.findByRole("link", { name: /Add PDFs, Markdown or text files/ })).toHaveAttribute(
       "href",
       "/documents",
     );
-    expect(screen.getByText(/Demo mode/)).toBeInTheDocument();
     expect(screen.getByLabelText("Question")).toBeDisabled();
   });
 

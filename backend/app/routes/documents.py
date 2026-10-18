@@ -124,8 +124,7 @@ async def search(body: SearchRequest, deps: Deps) -> list[Source]:
 async def config(deps: Deps) -> dict[str, object]:
     s = deps.settings
     return {
-        "demoMode": s.demo_mode,
-        "model": None if s.demo_mode else s.claude_model,
+        "model": s.claude_model,
         "maxUploadMb": s.max_upload_mb,
         "acceptedExtensions": sorted(SUPPORTED),
     }

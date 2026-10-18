@@ -56,7 +56,7 @@ made no measurable difference on this set).
 
 `BAAI/bge-small-en-v1.5` through fastembed (ONNX) runs on the CPU in a few milliseconds per passage, needs
 no API key, and costs nothing per call. The Docker image includes the model, so containers start offline.
-Only answer generation needs an API key, and without one the app still works in demo mode.
+Only answer generation needs an API key.
 
 **Trade-off:** a hosted embedding model would retrieve somewhat better on hard questions. Switching is a
 one-class change (`Embedder` protocol), plus a migration if the vector size differs from 384.

@@ -1,8 +1,6 @@
-import asyncio
-
 import pytest
 
-from app.answer import AnswerEvent, DemoAnswerer, build_messages, source_title
+from app.answer import build_messages, source_title
 from app.chat import SegmentBuilder, retrieval_query, sse
 from app.chunking import split_pages
 from app.config import Settings
@@ -99,16 +97,6 @@ def test_sse_format() -> None:
     assert sse("text", {"a": 1}) == 'event: text\ndata: {"a": 1}\n\n'
 
 
-def test_demo_mode_quotes_passages_with_citations() -> None:
-    async def collect() -> list[AnswerEvent]:
-        return [e async for e in DemoAnswerer().stream("q", [], [source(0), source(1)])]
-
-    events = asyncio.run(collect())
-    citations = [e for e in events if e.kind == "citation"]
-    assert [c.source_index for c in citations] == [0, 1]  # type: ignore[union-attr]
-    assert "Demo mode" in events[0].text  # type: ignore[union-attr]
-
-
 def test_rate_limiter_uses_a_sliding_window() -> None:
     limiter = RateLimiter(2, window_seconds=60)
     assert limiter.allow("a", now=0) and limiter.allow("a", now=1)
@@ -117,8 +105,9 @@ def test_rate_limiter_uses_a_sliding_window() -> None:
     assert limiter.allow("a", now=61)
 
 
-def test_settings_validate_and_switch_to_demo_mode_without_a_key() -> None:
-    assert Settings(database_url="postgresql://x", anthropic_api_key="").demo_mode
-    assert not Settings(database_url="postgresql://x", anthropic_api_key="sk-test").demo_mode
+def test_settings_require_an_api_key_and_a_postgres_url() -> None:
     with pytest.raises(ValueError):
-        Settings(database_url="mysql://x")
+        Settings(database_url="postgresql://x", anthropic_api_key="")
+    assert Settings(database_url="postgresql://x", anthropic_api_key="sk-test").anthropic_api_key == "sk-test"
+    with pytest.raises(ValueError):
+        Settings(database_url="mysql://x", anthropic_api_key="sk-test")

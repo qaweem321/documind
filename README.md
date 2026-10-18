@@ -18,8 +18,6 @@ Claude answers from them. Every claim links to the exact sentence it came from.
 - **Scope a chat** to some documents ("only search the expense policy").
 - **Upload pipeline.** Drag and drop, background processing with live status, duplicate detection by
   SHA-256, page numbers kept for PDFs, clear errors for scanned PDFs, renamed or unsupported files.
-- **Demo mode.** Without an API key, search and the citation UI still work: answers quote the best
-  passages instead.
 - **Measured retrieval.** `backend/evals/retrieval.py` scores keyword, semantic and hybrid search on
   20 questions (see [design decisions](docs/DECISIONS.md#3-why-hybrid-search-and-what-does-it-buy)).
 
@@ -30,7 +28,7 @@ You need Docker.
 ```bash
 git clone https://github.com/qaweem321/documind.git
 cd documind
-echo "ANTHROPIC_API_KEY=sk-ant-..." > .env   # optional: skip it for demo mode
+echo "ANTHROPIC_API_KEY=sk-ant-..." > .env   # required: get one at console.anthropic.com
 docker compose --profile app up -d --build
 ```
 
@@ -93,7 +91,7 @@ Backend environment variables:
 | Variable                       | Default                  | Notes                                          |
 | ------------------------------ | ------------------------ | ---------------------------------------------- |
 | `DATABASE_URL`                 | (required)               | Postgres with the `vector` extension available |
-| `ANTHROPIC_API_KEY`            | (empty: demo mode)       |                                                |
+| `ANTHROPIC_API_KEY`            | (required)               | The backend refuses to start without it        |
 | `CLAUDE_MODEL`                 | `claude-opus-5-5`        |                                                |
 | `CLAUDE_EFFORT`                | `medium`                 | `low` answers faster, `high` thinks longer     |
 | `EMBEDDING_MODEL`              | `BAAI/bge-small-en-v1.5` | Any fastembed model with 384 dimensions        |

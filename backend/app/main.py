@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
-from .answer import Answerer, create_answerer
+from .answer import Answerer, ClaudeAnswerer
 from .config import Settings, get_settings
 from .db import create_pool, run_migrations
 from .deps import Services
@@ -52,14 +52,14 @@ def create_app(
             settings=settings,
             pool=pool,
             embedder=used_embedder,
-            answerer=answerer or create_answerer(settings),
+            answerer=answerer or ClaudeAnswerer(settings),
             ingest=ingest,
             chat_limiter=RateLimiter(settings.chat_rate_limit_per_minute),
         )
         await ingest.start()
         if settings.seed_examples:
             await seed_examples(pool, ingest)
-        log.info("DocuMind ready (%s)", "demo mode" if settings.demo_mode else settings.claude_model)
+        log.info("DocuMind ready (%s)", settings.claude_model)
         try:
             yield
         finally:
