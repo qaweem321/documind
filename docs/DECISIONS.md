@@ -108,7 +108,9 @@ from cancellation).
 ## 10. What isn't there (yet)?
 
 - **Accounts.** DocuMind is a single-team tool: run it on a private network or behind your SSO proxy.
-  The chat endpoint is rate-limited per IP so a leaked URL can't run up an API bill quickly.
+  The chat endpoint is rate-limited per IP so a leaked URL can't run up an API bill quickly. The
+  browser reaches the backend through the Next.js proxy, which passes `X-Forwarded-For` on but
+  doesn't add to it, so the per-visitor count relies on the reverse proxy in front.
 - **OCR.** Scanned PDFs have no text layer; the upload says so instead of storing an empty document.
 - **More formats.** PDF, Markdown and plain text cover most handbooks and docs; Word files would be a
   new extractor in `extract.py`.

@@ -18,6 +18,7 @@ Claude answers from them. Every claim links to the exact sentence it came from.
 - **Scope a chat** to some documents ("only search the expense policy").
 - **Upload pipeline.** Drag and drop, background processing with live status, duplicate detection by
   SHA-256, page numbers kept for PDFs, clear errors for scanned PDFs, renamed or unsupported files.
+  Uploading a failed file again retries it.
 - **Demo mode.** Without an API key, search and the citation UI still work: answers quote the best
   passages instead.
 - **Measured retrieval.** `backend/evals/retrieval.py` scores keyword, semantic and hybrid search on
@@ -103,9 +104,14 @@ Backend environment variables:
 | `CHAT_RATE_LIMIT_PER_MINUTE`   | `20`                     | Questions per minute per client IP             |
 | `SEED_EXAMPLES`                | `false`                  | Load the sample handbook into an empty library |
 
-The frontend needs `BACKEND_URL` at build time (default `http://localhost:8000`).
+The frontend needs `BACKEND_URL` at build time (default `http://localhost:8000`). It proxies `/api`
+there and reads the backend's settings on the server, so the first page already shows demo mode.
 
 DocuMind has no user accounts: run it on a private network or behind your single sign-on proxy.
+The chat rate limit counts each visitor separately when that proxy adds the visitor's address to
+`X-Forwarded-For` (Caddy and nginx do): the Compose file lets the backend trust that header from the
+frontend container only (`FORWARDED_ALLOW_IPS`). Exposed directly on port 3600, all visitors share
+one limit.
 
 ## Tech
 

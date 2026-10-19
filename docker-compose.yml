@@ -28,6 +28,9 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       CORS_ORIGINS: '["http://localhost:3600"]'
       SEED_EXAMPLES: "true"
+      # Every request arrives through the frontend's proxy. Trusting its X-Forwarded-For header
+      # (only from this network) gives the rate limit each visitor's own address.
+      FORWARDED_ALLOW_IPS: 172.30.236.0/24
     depends_on:
       db: { condition: service_healthy }
     profiles: ["app"]
@@ -39,6 +42,13 @@ services:
     depends_on:
       backend: { condition: service_healthy }
     profiles: ["app"]
+
+# A fixed subnet, so FORWARDED_ALLOW_IPS above can name it.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.236.0/24
 
 volumes:
   pgdata:
