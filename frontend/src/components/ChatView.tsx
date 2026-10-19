@@ -57,6 +57,7 @@ export function ChatView({ initial, actions }: { initial: ConversationDetail | n
     setInput("");
     const answer = new AnswerDraft();
     let created: Conversation | null = null;
+    let finished = false;
     setDraft(answer.toMessage("draft"));
     setMessages((m) => [
       ...m,
@@ -87,6 +88,7 @@ export function ChatView({ initial, actions }: { initial: ConversationDetail | n
           });
         else if (event.event === "error") answer.error = event.data.message;
         else if (event.event === "done") {
+          finished = true;
           setMessages((m) => [...m, answer.toMessage(event.data.messageId)]);
           setDraft(null);
           if (answer.error) setError(new Error(answer.error));
@@ -94,6 +96,8 @@ export function ChatView({ initial, actions }: { initial: ConversationDetail | n
         }
         setDraft(answer.toMessage("draft"));
       }
+      // The server always ends with "done"; without it the connection broke mid-answer.
+      if (!finished) throw new Error("The answer was cut off. Try asking again.");
     } catch (err) {
       if (!(err instanceof DOMException && err.name === "AbortError")) setError(err);
       if (answer.segments.length > 0) setMessages((m) => [...m, answer.toMessage(`partial-${Date.now()}`)]);

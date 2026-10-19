@@ -5,6 +5,7 @@ import { mockFetch, renderWithQuery, sse, streamOf } from "@/test/render";
 import type { Source } from "@/lib/types";
 import { ChatView } from "./ChatView";
 import { Library } from "./Library";
+import { Providers } from "./Providers";
 import { Highlighted } from "./SourceList";
 import { ConfirmButton } from "./ui";
 
@@ -99,6 +100,16 @@ describe("ChatView", () => {
     expect(screen.getByLabelText("Question")).toBeDisabled();
   });
 
+  it("shows the demo notice at once when the server passed the settings in", () => {
+    mockFetch({ "GET /api/documents": [readyDoc] });
+    render(
+      <Providers config={{ ...config, demoMode: true, model: null }}>
+        <ChatView initial={null} />
+      </Providers>,
+    );
+    expect(screen.getByText(/Demo mode/)).toBeInTheDocument();
+  });
+
   it("shows server errors such as the rate limit", async () => {
     mockFetch({
       "GET /api/config": config,
@@ -124,6 +135,35 @@ describe("ChatView", () => {
     await waitFor(() => expect(box).toBeEnabled());
     await userEvent.type(box, "Hi{Enter}");
     expect(await screen.findByRole("alert")).toHaveTextContent("Too many questions");
+  });
+
+  it("says so when the answer stream breaks off before it's done", async () => {
+    mockFetch({
+      "GET /api/config": config,
+      "GET /api/documents": [readyDoc],
+      "POST /api/conversations/c1/messages": () =>
+        new Response(streamOf(sse("sources", [source]), sse("text", { block: 0, text: "You have" })), {
+          status: 200,
+          headers: { "content-type": "text/event-stream" },
+        }),
+    });
+    renderWithQuery(
+      <ChatView
+        initial={{
+          id: "c1",
+          title: "Old chat",
+          documentIds: null,
+          createdAt: "",
+          updatedAt: "",
+          messages: [],
+        }}
+      />,
+    );
+    const box = await screen.findByLabelText("Question");
+    await waitFor(() => expect(box).toBeEnabled());
+    await userEvent.type(box, "Hi{Enter}");
+    expect(await screen.findByRole("alert")).toHaveTextContent("The answer was cut off");
+    expect(screen.getByText("You have")).toBeInTheDocument();
   });
 });
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/Providers";
 import { Sidebar } from "@/components/Sidebar";
+import { loadConfig } from "@/lib/server-config";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.svg" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const config = await loadConfig();
   return (
     <html lang="en">
       <body>
-        <Providers>
+        <Providers config={config}>
           <div className="md:flex">
             <Sidebar />
             <main className="min-w-0 flex-1">{children}</main>

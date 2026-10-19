@@ -11,6 +11,8 @@ const securityHeaders = [
 
 const config: NextConfig = {
   output: "standalone",
+  // Also for server code (src/lib/server-config.ts): fixed at build time, like the rewrites.
+  env: { BACKEND_URL: backend },
   poweredByHeader: false,
   // Compression would buffer the answer stream; the browser should get each token as it arrives.
   compress: false,

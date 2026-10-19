@@ -2,8 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "./api";
 import type { AppConfig, Conversation, Doc } from "./types";
 
+export const CONFIG_KEY = ["config"];
+
+// Usually already filled in by the server render (see Providers).
 export const useConfig = () =>
-  useQuery({ queryKey: ["config"], queryFn: () => api<AppConfig>("/config"), staleTime: Infinity });
+  useQuery({ queryKey: CONFIG_KEY, queryFn: () => api<AppConfig>("/config"), staleTime: Infinity });
 
 export const useConversations = () =>
   useQuery({ queryKey: ["conversations"], queryFn: () => api<Conversation[]>("/conversations") });

@@ -92,7 +92,11 @@ export function Library() {
           accept={accept}
           className="hidden"
           aria-label="Choose files"
-          onChange={(e) => send(e.target.files)}
+          onChange={(e) => {
+            send(e.target.files);
+            // Lets the same file be chosen again, e.g. to retry one that failed.
+            e.target.value = "";
+          }}
         />
         <button
           type="button"
