@@ -62,6 +62,11 @@ def test_keyword_terms_or_the_words_and_drop_symbols() -> None:
     assert keyword_terms("?!") == ""
 
 
+def test_keyword_terms_are_capped_by_word_count_not_characters() -> None:
+    terms = keyword_terms(" ".join(f"w{i}" for i in range(500)))
+    assert terms.count(" | ") == 99 and not terms.endswith(("|", " "))
+
+
 def test_follow_up_questions_are_searched_with_the_previous_one() -> None:
     from app.answer import Turn
 

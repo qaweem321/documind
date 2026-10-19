@@ -11,6 +11,8 @@ from .schemas import Source
 # Candidates taken from each method before fusing, and the Reciprocal Rank Fusion constant.
 CANDIDATES = 40
 RRF_K = 60
+# Words used for the keyword search; a pasted page of text doesn't need all of them.
+MAX_KEYWORD_TERMS = 100
 
 # One round trip: the nearest chunks by meaning (pgvector, HNSW) and the best keyword matches
 # (Postgres full-text), fused by Reciprocal Rank Fusion. Each list contributes 1 / (60 + rank),
@@ -56,9 +58,10 @@ LIMIT %(k)s
 def keyword_terms(query: str) -> str:
     """Any of the query's words may match ("refund | policy | days"). Questions rarely contain
     every word of the passage that answers them, so AND would miss too much. Postgres drops
-    stop words and stems the rest."""
-    words = re.findall(r"[A-Za-z0-9]+", query.lower())
-    return " | ".join(dict.fromkeys(words))[:2000]
+    stop words and stems the rest. Capped by word count, never by characters: a cut in the
+    middle could leave a dangling "|", which is a syntax error."""
+    words = list(dict.fromkeys(re.findall(r"[A-Za-z0-9]+", query.lower())))
+    return " | ".join(words[:MAX_KEYWORD_TERMS])
 
 
 async def hybrid_search(

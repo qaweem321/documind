@@ -59,6 +59,23 @@ def test_duplicate_and_invalid_uploads_are_reported_per_file(client: TestClient)
     assert "isn't supported" in exe["error"]
 
 
+def test_uploading_a_failed_file_again_processes_it_again(client: TestClient) -> None:
+    broken = b"%PDF-1.4 broken"
+    first = wait_until_processed(client, upload(client, "broken.pdf", broken)["document"]["id"])
+    assert first["status"] == "failed"
+    again = upload(client, "broken.pdf", broken)
+    assert again["duplicate"] is False
+    assert again["document"]["id"] == first["id"] and again["document"]["status"] == "processing"
+    assert wait_until_processed(client, first["id"])["status"] == "failed"
+
+
+def test_search_accepts_the_longest_allowed_query(client: TestClient) -> None:
+    upload(client, "equipment.md", HANDBOOK)
+    # Cutting this query's search terms at a fixed length used to leave a dangling "|".
+    query = ("a " + " ".join(f"q{i}" for i in range(600)))[:2000]
+    assert client.post("/api/search", json={"query": query}).status_code == 200
+
+
 def test_hybrid_search_finds_the_right_passage_and_respects_the_document_filter(client: TestClient) -> None:
     equipment = wait_until_processed(client, upload(client, "equipment.md", HANDBOOK)["document"]["id"])
     travel = wait_until_processed(client, upload(client, "travel.md", TRAVEL)["document"]["id"])

@@ -48,28 +48,42 @@ async def upload_documents(files: list[UploadFile], deps: Deps) -> list[UploadRe
         except UnsupportedFile as error:
             results.append(UploadResult(filename=name, error=str(error)))
             continue
+        digest = sha256(data)
         async with deps.pool.connection() as conn, conn.transaction():
             row = await (
                 await conn.execute(
                     "INSERT INTO documents (title, filename, content_type, sha256, size_bytes) "
                     "VALUES (%s, %s, %s, %s, %s) ON CONFLICT (sha256) DO NOTHING "
                     f"RETURNING {DOCUMENT_COLUMNS}",
-                    (title_from(name, []), name, content_type, sha256(data), len(data)),
+                    (title_from(name, []), name, content_type, digest, len(data)),
                 )
             ).fetchone()
             if row is None:
-                existing = await (
+                # The same file again: one that failed before is processed again (its error says
+                # to upload it again); any other is reported as a duplicate.
+                row = await (
                     await conn.execute(
-                        f"SELECT {DOCUMENT_COLUMNS} FROM documents WHERE sha256 = %s", (sha256(data),)
+                        "UPDATE documents SET status = 'processing', error = NULL "
+                        f"WHERE sha256 = %s AND status = 'failed' RETURNING {DOCUMENT_COLUMNS}",
+                        (digest,),
                     )
                 ).fetchone()
-                results.append(
-                    UploadResult(filename=name, duplicate=True, document=DocumentOut.model_validate(existing))
+                if row is None:
+                    existing = await (
+                        await conn.execute(
+                            f"SELECT {DOCUMENT_COLUMNS} FROM documents WHERE sha256 = %s", (digest,)
+                        )
+                    ).fetchone()
+                    results.append(
+                        UploadResult(
+                            filename=name, duplicate=True, document=DocumentOut.model_validate(existing)
+                        )
+                    )
+                    continue
+            else:
+                await conn.execute(
+                    "INSERT INTO document_files (document_id, data) VALUES (%s, %s)", (row["id"], data)
                 )
-                continue
-            await conn.execute(
-                "INSERT INTO document_files (document_id, data) VALUES (%s, %s)", (row["id"], data)
-            )
         results.append(UploadResult(filename=name, document=DocumentOut.model_validate(row)))
         deps.ingest.put(row["id"])
     return results
