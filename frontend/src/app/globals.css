@@ -4,6 +4,12 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  /* Tailwind 4 gives buttons the default arrow; clickable things get the pointer hand. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    cursor: pointer;
+  }
   :root {
     color-scheme: light;
   }
