@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
+/* Dark mode follows the .dark class set by the theme script and the sidebar's Theme menu. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+  :root.dark {
+    color-scheme: dark;
+  }
   body {
     @apply bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100;
   }

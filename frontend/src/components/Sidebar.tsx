@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useConversations } from "@/lib/queries";
+import { ThemeSelect } from "./ThemeSelect";
 
 export function Logo() {
   return (
@@ -64,6 +65,13 @@ export function Sidebar() {
               {c.title}
             </Link>
           ))}
+        </div>
+        {/* Changing the theme must not close the mobile menu like a link click does. */}
+        <div
+          className="mt-3 border-t border-stone-200 pt-3 dark:border-stone-800"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <ThemeSelect />
         </div>
       </nav>
     </aside>

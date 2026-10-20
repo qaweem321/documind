@@ -19,6 +19,7 @@ Claude answers from them. Every claim links to the exact sentence it came from.
 - **Upload pipeline.** Drag and drop, background processing with live status, duplicate detection by
   SHA-256, page numbers kept for PDFs, clear errors for scanned PDFs, renamed or unsupported files.
   Uploading a failed file again retries it.
+- **Light, dark or system theme**, chosen in the sidebar and remembered in the browser.
 - **Demo mode.** Without an API key, search and the citation UI still work: answers quote the best
   passages instead.
 - **Measured retrieval.** `backend/evals/retrieval.py` scores keyword, semantic and hybrid search on

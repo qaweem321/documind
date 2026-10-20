@@ -4,6 +4,7 @@ import { AnswerDraft, citationNumbers } from "./answer";
 import { errorMessage } from "./api";
 import { formatBytes, formatDate, plural } from "./format";
 import { readEvents } from "./sse";
+import { getTheme, isTheme, setTheme } from "./theme";
 
 async function collect(stream: ReadableStream<Uint8Array>) {
   const events = [];
@@ -78,5 +79,22 @@ describe("errorMessage", () => {
       "String should have at least 1 character",
     );
     expect(errorMessage(null, 502)).toMatch(/server/);
+  });
+});
+
+describe("theme", () => {
+  it("accepts only the three choices", () => {
+    expect(["system", "light", "dark"].every(isTheme)).toBe(true);
+    expect(isTheme("blue")).toBe(false);
+  });
+
+  it("saves the choice and sets the dark class", () => {
+    expect(getTheme()).toBe("system");
+    setTheme("dark");
+    expect(getTheme()).toBe("dark");
+    expect(document.documentElement).toHaveClass("dark");
+    setTheme("light");
+    expect(document.documentElement).not.toHaveClass("dark");
+    localStorage.clear();
   });
 });
