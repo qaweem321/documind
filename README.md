@@ -58,6 +58,28 @@ flowchart LR
 
 The full reasoning, with trade-offs, is in [docs/DECISIONS.md](docs/DECISIONS.md).
 
+## Project structure
+
+```
+backend/                FastAPI service (Python)
+  app/
+    main.py             app setup; routes/ has the documents and conversations API
+    extract.py, chunking.py, embeddings.py, ingest.py   upload → text → chunks → vectors (background queue)
+    search.py           hybrid search: vector + full-text, merged with RRF
+    answer.py, chat.py  Claude (or the offline demo answerer), citations, streaming as server-sent events
+    migrations/         database schema (Postgres + pgvector)
+    seed.py             loads the examples into an empty library (SEED_EXAMPLES)
+  examples/             the example policy documents
+  evals/retrieval.py    measures search quality
+  tests/
+frontend/               Next.js web app
+  src/app/              pages: home, documents/, chat/[id]/
+  src/components/       chat view, sources list, document library, sidebar
+  src/lib/              API client, stream reader, data fetching
+docs/DECISIONS.md       design choices and trade-offs
+docker-compose.yml      runs Postgres, backend and frontend together
+```
+
 ## Development
 
 ```bash
